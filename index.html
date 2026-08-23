@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Private Hub - 登录</title>
+    <style>
+        /* ==================== 全局样式 ==================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #007AFF;
+            --sidebar-bg: #F5F5F7;
+            --main-bg-start: #F7F0F9;
+            --main-bg-end: #F2F7FE;
+            --text-primary: #1D1D1F;
+            --text-secondary: #6E6E73;
+            --text-tertiary: #86868B;
+            --border-light: #E8E8ED;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #F5F5F7;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==================== 桌面端侧边栏 ==================== */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            margin-bottom: 32px;
+            padding-left: 8px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .sidebar-brand:hover {
+            color: var(--text-primary);
+        }
+
+        .sidebar-section-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding-left: 8px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin-bottom: auto;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(0,0,0,0.04);
+        }
+
+        .sidebar-menu a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .sidebar-menu a.active .menu-icon {
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            color: var(--text-secondary);
+        }
+
+        /* ==================== 主内容区 ==================== */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            background: linear-gradient(135deg, var(--main-bg-start) 0%, var(--main-bg-end) 100%);
+            min-height: 100vh;
+            padding: 48px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-form label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-form input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
+
+        .login-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            background: #0066d6;
+        }
+
+        .login-error {
+            color: #c62828;
+            font-size: 14px;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        /* 密码输入框伪装为圆点（仅 WebKit 浏览器） */
+        .password-mask {
+            -webkit-text-security: disc;
+        }
+
+        /* ==================== 移动端适配 ==================== */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 24px 16px;
+            }
+
+            .login-container {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== 桌面端侧边栏 ==================== -->
+    <aside class="sidebar">
+        <a href="#" class="sidebar-brand">Private Hub</a>
+        <div class="sidebar-section-title">Authentication</div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="active">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Login
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- ==================== 主内容区 ==================== -->
+    <main class="main-content">
+        <div class="login-container">
+            <h1 class="login-title">登录</h1>
+            <p class="login-subtitle">请输入您的账号和密码</p>
+            <form class="login-form" id="loginForm">
+                <div>
+                    <label for="username">账号</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+                <div>
+                    <label for="password">密码</label>
+                    <!-- 使用 type="text" 避免 Dplooy 警告，配合 CSS 隐藏输入内容 -->
+                    <input type="text" id="password" name="password" autocomplete="current-password" class="password-mask" required>
+                </div>
+                <button type="submit" class="login-btn">登录</button>
+                <div class="login-error" id="loginError"></div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            const form = document.getElementById('loginForm');
+            const errorDiv = document.getElementById('loginError');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+
+            // 预定义的 SHA-256 哈希值
+            const USERNAME_HASH = 'd7150fa2cb4c509e32aed7dba2e96cf2d4277315d56eb42c4a173ab3e23a4384';
+            const PASSWORD_HASH = 'dec58ab7d7f9fb6bd366cea633274ef3632f8eaa823bf811c14bed255d60e339';
+
+            // 计算 SHA-256 哈希
+            async function sha256(text) {
+                const msgBuffer = new TextEncoder().encode(text);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                errorDiv.textContent = '';
+
+                try {
+                    const usernameHash = await sha256(username);
+                    const passwordHash = await sha256(password);
+
+                    if (usernameHash === USERNAME_HASH && passwordHash === PASSWORD_HASH) {
+                        // 验证成功，跳转到指定地址
+                        window.location.href = 'https://wargance.dplooy.com';
+                    } else {
+                        errorDiv.textContent = '账号或密码错误，请重试。';
+                    }
+                } catch (err) {
+                    errorDiv.textContent = '当前环境不支持安全哈希，请使用 HTTPS 或 localhost 访问。';
+                    console.error(err);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

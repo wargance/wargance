@@ -1,0 +1,2552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>菜品识别工具</title>
+    <style>
+        /* ==================== 全局样式 ==================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #007AFF;
+            --sidebar-bg: #F5F5F7;
+            --main-bg-start: #F7F0F9;
+            --main-bg-end: #F2F7FE;
+            --text-primary: #1D1D1F;
+            --text-secondary: #6E6E73;
+            --text-tertiary: #86868B;
+            --border-light: #E8E8ED;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #F5F5F7;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==================== 桌面端侧边栏 ==================== */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            margin-bottom: 32px;
+            padding-left: 8px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .sidebar-brand:hover {
+            color: var(--text-primary);
+        }
+
+        .sidebar-section-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding-left: 8px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin-bottom: auto;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(0,0,0,0.04);
+        }
+
+        .sidebar-menu a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .sidebar-menu a.active .menu-icon {
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-settings {
+            padding: 8px;
+            font-size: 14px;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            border: none;
+            background: none;
+            text-align: left;
+            font-family: inherit;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-settings:hover {
+            background: rgba(0,0,0,0.04);
+            color: var(--text-secondary);
+        }
+
+        /* ==================== 主内容区 ==================== */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            background: linear-gradient(135deg, var(--main-bg-start) 0%, var(--main-bg-end) 100%);
+            min-height: 100vh;
+            padding: 48px 64px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .title-subtitle {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            line-height: 1.1;
+            margin: 0 0 4px 0;
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .top-bar {
+            text-align: right;
+        }
+
+        .clock-time {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .clock-date {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .config-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .config-item {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .config-item label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .config-item input,
+        .weight-input-group input,
+        .settings-input,
+        .custom-dish-form input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .config-item input:focus,
+        .weight-input-group input:focus,
+        .settings-input:focus,
+        .custom-dish-form input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .button-group button,
+        .save-btn,
+        .refresh-btn,
+        .clear-all-btn,
+        .settings-save-btn,
+        .custom-dish-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-light);
+            background: #fff;
+            color: var(--text-primary);
+            white-space: nowrap;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .button-group button:hover,
+        .save-btn:hover,
+        .refresh-btn:hover,
+        .clear-all-btn:hover,
+        .settings-save-btn:hover,
+        .custom-dish-btn:hover {
+            border-color: #d0d0d5;
+            background: #f9f9f9;
+        }
+
+        .button-group button:active,
+        .save-btn:active,
+        .refresh-btn:active,
+        .clear-all-btn:active,
+        .settings-save-btn:active,
+        .custom-dish-btn:active {
+            background: #f0f0f0;
+        }
+
+        .button-group button:disabled,
+        .save-btn:disabled,
+        .refresh-btn:disabled,
+        .clear-all-btn:disabled,
+        .settings-save-btn:disabled,
+        .custom-dish-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .save-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+
+        .save-btn:hover {
+            background: #0066d6;
+        }
+
+        .clear-all-btn {
+            background: #fff0f0;
+            color: #d32f2f;
+            border-color: #ffd0d0;
+        }
+
+        .clear-all-btn:hover {
+            background: #ffe5e5;
+            border-color: #ffb0b0;
+        }
+
+        .refresh-btn {
+            margin-left: auto;
+            background: #f0f0f5;
+            border-color: transparent;
+        }
+
+        .refresh-btn:disabled {
+            background: #e0e0e5;
+            color: #aaa;
+        }
+
+        .settings-save-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .settings-save-btn:hover {
+            background: #0066d6;
+        }
+
+        .status-bar {
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .status-bar.success {
+            color: #2e7d32;
+            background: rgba(232,245,233,0.8);
+        }
+
+        .status-bar.error {
+            color: #c62828;
+            background: rgba(253,236,234,0.8);
+        }
+
+        .status-bar.loading {
+            color: #f57f17;
+            background: rgba(255,248,225,0.8);
+        }
+
+        .preview-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-placeholder {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        .result-area {
+            background: rgba(255,255,255,0.8);
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .result-list {
+            list-style: none;
+        }
+
+        .result-list li {
+            padding: 8px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .result-name {
+            font-weight: 600;
+        }
+
+        .result-confidence {
+            color: var(--primary);
+        }
+
+        .result-calorie {
+            color: #e67e22;
+        }
+
+        .weight-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .weight-input-group input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .total-calorie {
+            font-weight: 600;
+            color: #e67e22;
+            margin-bottom: 16px;
+        }
+
+        .history-list {
+            list-style: none;
+            background: rgba(255,255,255,0.8);
+            border-radius: 12px;
+            padding: 8px 16px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f5;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .history-name {
+            font-weight: 600;
+        }
+
+        .history-calorie {
+            color: #e67e22;
+            font-size: 14px;
+        }
+
+        .history-time {
+            color: var(--text-tertiary);
+            font-size: 13px;
+            margin-left: auto;
+        }
+
+        .history-delete {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .history-delete:hover {
+            background: #ffe5e5;
+        }
+
+        .total-calories-display {
+            text-align: right;
+            font-weight: 600;
+            color: #e67e22;
+            margin-top: 8px;
+            font-size: 15px;
+        }
+
+        .log-area {
+            background: rgba(255,255,255,0.8);
+            border-radius: 12px;
+            padding: 16px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+        }
+
+        .log-time {
+            color: var(--text-tertiary);
+            margin-right: 8px;
+        }
+
+        .log-message.success {
+            color: #2e7d32;
+        }
+
+        .log-message.error {
+            color: #c62828;
+        }
+
+        .log-message.warning {
+            color: #f57f17;
+        }
+
+        .log-message.info {
+            color: var(--primary);
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        /* ==================== 移动端顶部栏、抽屉、遮罩 ==================== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: rgba(245,245,247,0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 200;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+        }
+
+        .mobile-header .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            gap: 5px;
+            margin-right: 12px;
+        }
+
+        .mobile-header .hamburger span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: var(--text-primary);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .mobile-header .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .mobile-header .header-title:hover {
+            text-decoration: underline;
+        }
+
+        .mobile-header .header-version {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 190;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.show {
+            opacity: 1;
+        }
+
+        .mobile-drawer {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            bottom: 16px;
+            width: calc(100% - 32px);
+            max-width: 320px;
+            background: rgba(245,245,247,0.98);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 210;
+            padding: 24px;
+            transform: translateX(-120%);
+            transition: transform 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .mobile-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .mobile-drawer-header .drawer-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .mobile-drawer-header .close-btn {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-primary);
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .mobile-drawer .drawer-section-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .mobile-drawer .drawer-menu {
+            list-style: none;
+            margin-bottom: auto;
+        }
+
+        .mobile-drawer .drawer-menu li {
+            margin-bottom: 4px;
+        }
+
+        .mobile-drawer .drawer-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .mobile-drawer .drawer-menu a.active {
+            background: #fff;
+            color: var(--text-primary);
+        }
+
+        .mobile-drawer .drawer-menu a.active .drawer-icon-container {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .mobile-drawer .drawer-icon-container {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .mobile-drawer .drawer-icon-container svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .mobile-drawer .drawer-settings {
+            padding: 12px;
+            font-size: 14px;
+            color: var(--text-tertiary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            text-align: left;
+        }
+
+        .mobile-drawer .drawer-settings:hover {
+            background: rgba(0,0,0,0.04);
+            color: var(--text-secondary);
+        }
+
+        /* ==================== 设置抽屉 ==================== */
+        .settings-drawer {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            bottom: 16px;
+            width: calc(100% - 32px);
+            max-width: 360px;
+            background: rgba(245,245,247,0.98);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 210;
+            padding: 24px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .settings-drawer.open {
+            transform: translateX(0);
+        }
+
+        .settings-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .settings-drawer-header .settings-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .settings-drawer-header .close-btn {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-primary);
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .settings-item {
+            margin-bottom: 20px;
+        }
+
+        .settings-item label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .settings-link {
+            display: block;
+            padding: 8px 0;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .settings-link:hover {
+            text-decoration: underline;
+        }
+
+        .settings-signout {
+            padding: 12px 0;
+            font-size: 14px;
+            color: var(--text-tertiary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            margin-top: auto;
+        }
+
+        .settings-signout:hover {
+            background: rgba(0,0,0,0.04);
+            color: var(--text-secondary);
+        }
+
+        /* 桌面端设置抽屉宽度调整 */
+        @media (min-width: 769px) {
+            .settings-drawer {
+                left: 270px;
+                right: 16px;
+                max-width: none;
+                width: auto;
+            }
+        }
+
+        /* ==================== 自定义菜品模态框 ==================== */
+        .custom-dish-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-dish-modal.show {
+            display: flex;
+        }
+
+        .custom-dish-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 90%;
+            width: 480px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .custom-dish-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .custom-dish-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .custom-dish-form label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .custom-dish-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            background: #fff;
+            outline: none;
+        }
+
+        .custom-dish-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        /* ==================== 流量提示模态框 ==================== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .modal-message {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .modal-btn.primary:hover {
+            background: #0066d6;
+        }
+
+        .modal-btn.secondary {
+            background: #f0f0f5;
+            color: var(--text-primary);
+        }
+
+        .modal-btn.secondary:hover {
+            background: #e0e0e5;
+        }
+
+        /* ==================== 每日热量记录样式 ==================== */
+        .daily-calories-list {
+            list-style: none;
+            background: rgba(255,255,255,0.8);
+            border-radius: 12px;
+            padding: 8px 16px;
+        }
+
+        .daily-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f5;
+        }
+
+        .daily-item:last-child {
+            border-bottom: none;
+        }
+
+        .daily-date {
+            font-weight: 500;
+        }
+
+        .daily-total {
+            font-weight: 600;
+            color: #e67e22;
+        }
+
+        /* ==================== 自选食物抽屉 ==================== */
+        .custom-select-drawer {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            bottom: 16px;
+            width: calc(100% - 32px);
+            max-width: 360px;
+            background: rgba(245,245,247,0.98);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 210;
+            padding: 24px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .custom-select-drawer.open {
+            transform: translateX(0);
+        }
+
+        .custom-select-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .custom-select-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .custom-select-close-btn {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-primary);
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .custom-select-list {
+            list-style: none;
+            margin-bottom: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .custom-select-list li {
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .custom-select-list li:hover {
+            background: rgba(0,0,0,0.04);
+        }
+
+        .custom-select-list li.selected {
+            background: #e8f0fe;
+        }
+
+        .custom-select-name {
+            font-weight: 500;
+        }
+
+        .custom-select-calorie {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .custom-select-weight-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .custom-select-weight-group input {
+            width: 80px;
+            text-align: center;
+            padding: 10px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .custom-select-total {
+            font-weight: 600;
+            color: #e67e22;
+            margin-bottom: 16px;
+        }
+
+        .custom-select-save-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .custom-select-save-btn:hover {
+            background: #0066d6;
+        }
+
+        .custom-select-save-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* 手动输入区域 */
+        .manual-input-group {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 16px;
+        }
+
+        .manual-input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .manual-input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .manual-total {
+            font-weight: 600;
+            color: #e67e22;
+            margin: 8px 0;
+        }
+
+        .manual-save-btn {
+            background: #34c759;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .manual-save-btn:hover {
+            background: #28a745;
+        }
+
+        .manual-save-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* 桌面端自选抽屉宽度调整（与设置抽屉一致） */
+        @media (min-width: 769px) {
+            .custom-select-drawer {
+                left: 270px;
+                right: 16px;
+                max-width: none;
+                width: auto;
+            }
+        }
+
+        /* ==================== 移动端适配 ==================== */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 72px 16px 24px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .mobile-drawer {
+                display: flex;
+            }
+
+            .overlay {
+                display: block;
+                pointer-events: none;
+            }
+
+            .overlay.show {
+                pointer-events: auto;
+            }
+
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .title-subtitle {
+                width: 100%;
+            }
+
+            .page-title {
+                font-size: 32px;
+                margin-bottom: 8px;
+            }
+
+            .page-subtitle {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .top-bar {
+                text-align: left;
+                width: 100%;
+            }
+
+            .section {
+                margin-bottom: 32px;
+            }
+
+            .button-group button {
+                flex: 1;
+                min-width: calc(50% - 8px);
+            }
+
+            .preview-container {
+                width: 100%;
+                max-width: 250px;
+                height: auto;
+                aspect-ratio: 1/1;
+            }
+
+            .settings-drawer,
+            .custom-select-drawer {
+                top: 16px;
+                right: 16px;
+                bottom: 16px;
+                left: 16px;
+                width: auto;
+                max-width: none;
+                border-radius: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== 桌面端侧边栏 ==================== -->
+    <aside class="sidebar">
+        <a href="https://johnappleseed.asia/" target="_blank" class="sidebar-brand">Private Hub V1</a>
+        <div class="sidebar-section-title">Private</div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="Food calorie calculator.html" class="active">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    Food calorie calculator
+                </a>
+            </li>
+        </ul>
+        <button class="sidebar-settings" id="btnOpenSettingsDesktop">Settings</button>
+    </aside>
+
+    <!-- ==================== 移动端顶部栏 ==================== -->
+    <header class="mobile-header" id="mobileHeader">
+        <div class="hamburger" id="hamburgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <a href="https://johnappleseed.asia/" target="_blank" class="header-title">Private Hub</a>
+        <div class="header-version">V3</div>
+    </header>
+
+    <!-- ==================== 遮罩层 ==================== -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- ==================== 移动端导航抽屉 ==================== -->
+    <nav class="mobile-drawer" id="mobileDrawer">
+        <div class="mobile-drawer-header">
+            <span class="drawer-title">Private Hub V3</span>
+            <button class="close-btn" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-section-title">Private</div>
+        <ul class="drawer-menu">
+            <li>
+                <a href="Food calorie calculator.html" class="active">
+                    <span class="drawer-icon-container">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </span>
+                    Food calorie calculator
+                </a>
+            </li>
+        </ul>
+        <button class="drawer-settings" id="btnOpenSettingsMobile">Settings</button>
+    </nav>
+
+    <!-- ==================== 设置抽屉 ==================== -->
+    <div class="settings-drawer" id="settingsDrawer">
+        <div class="settings-drawer-header">
+            <span class="settings-title">Settings</span>
+            <button class="close-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+        <div class="settings-item">
+            <label for="settingsAccessToken">Access Token</label>
+            <input type="text" id="settingsAccessToken" class="settings-input" placeholder="请输入 Access Token" value="24.a993c78b60d18ed1c86803dc63f20dd0.2592000.1789874918.282335-124174945">
+        </div>
+        <div class="settings-item">
+            <label for="settingsDefaultWeight">默认估计重量（克）</label>
+            <input type="number" id="settingsDefaultWeight" class="settings-input" min="1" step="25" value="200">
+        </div>
+        <div class="settings-item">
+            <label for="settingsMaxDim">图片压缩最长边（像素）</label>
+            <input type="number" id="settingsMaxDim" class="settings-input" min="400" step="10" value="1280">
+        </div>
+        <div class="settings-item">
+            <label for="settingsQuality">图片压缩质量（0.1-1.0）</label>
+            <input type="number" id="settingsQuality" class="settings-input" min="0.1" max="1.0" step="0.05" value="0.7">
+        </div>
+        <div class="settings-item">
+            <a href="https://supabase.com/dashboard/org/vtldmtzewfktbqtogxdw" target="_blank" class="settings-link">Supabase</a>
+        </div>
+        <div class="settings-item">
+            <a href="https://console.bce.baidu.com/ai-engine/imagerecognition/overview/index" target="_blank" class="settings-link">百度控制台</a>
+        </div>
+        <button class="settings-save-btn" id="btnSaveSettings">保存设置</button>
+        <a href="https://johnappleseed.asia/login/" class="settings-signout" style="margin-top: auto;">Sign Out</a>
+    </div>
+
+    <!-- ==================== 自定义菜品模态框 ==================== -->
+    <div class="custom-dish-modal" id="customDishModal">
+        <div class="custom-dish-box">
+            <div class="custom-dish-title">识别为未知菜品</div>
+            <div class="custom-dish-form">
+                <div>
+                    <label for="customDishSelect">从已有菜品中选择（按首字母排序）</label>
+                    <select id="customDishSelect" class="custom-dish-select">
+                        <option value="">-- 请选择 --</option>
+                    </select>
+                </div>
+                <div>
+                    <label>或新建菜品</label>
+                    <input type="text" id="newDishName" class="settings-input" placeholder="菜品名称">
+                    <input type="number" id="newDishCalorie" class="settings-input" placeholder="每100g热量（大卡）" min="0" step="25" style="margin-top:8px;">
+                </div>
+                <div class="custom-dish-buttons">
+                    <button class="modal-btn secondary" id="customDishCancelBtn">取消</button>
+                    <button class="modal-btn primary" id="customDishConfirmBtn">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 流量提示模态框 ==================== -->
+    <div class="modal-overlay" id="flowModal">
+        <div class="modal-box">
+            <div class="modal-title">流量提示</div>
+            <div class="modal-message" id="flowModalMessage"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="flowCancelBtn">取消</button>
+                <button class="modal-btn primary" id="flowConfirmBtn">继续识别</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 自选食物抽屉 ==================== -->
+    <div class="custom-select-drawer" id="customSelectDrawer">
+        <div class="custom-select-header">
+            <span class="custom-select-title">自选食物</span>
+            <button class="custom-select-close-btn" id="closeCustomSelectBtn">&times;</button>
+        </div>
+        <ul class="custom-select-list" id="customSelectList"></ul>
+        <div class="custom-select-weight-group">
+            <label for="customSelectWeight">估计重量：</label>
+            <input type="number" id="customSelectWeight" min="1" step="25" value="200">
+            <span>克</span>
+        </div>
+        <div class="custom-select-total" id="customSelectTotal">总热量：-- 大卡</div>
+        <button class="custom-select-save-btn" id="btnSaveCustomSelect">保存到历史记录</button>
+
+        <!-- 手动输入区域 -->
+        <div class="manual-input-group">
+            <label for="manualName">食物名称</label>
+            <input type="text" id="manualName" placeholder="例如：自制沙拉">
+            <label for="manualWeight">重量（克）</label>
+            <input type="number" id="manualWeight" min="1" step="25" value="200">
+            <label for="manualEnergy">能量（千焦/100克）</label>
+            <input type="number" id="manualEnergy" min="0" step="1" placeholder="例如：500">
+            <div class="manual-total" id="manualTotal">总热量：-- 大卡</div>
+            <button class="manual-save-btn" id="btnSaveManualDish">保存</button>
+        </div>
+    </div>
+
+    <!-- ==================== 主内容区 ==================== -->
+    <main class="main-content">
+
+        <div class="header-container">
+            <div class="title-subtitle">
+                <h1 class="page-title" id="pageTitle">Good morning, wargance</h1>
+                <p class="page-subtitle">上传食物图片，自动识别菜品并估算热量</p>
+            </div>
+            <div class="top-bar">
+                <div class="clock-time" id="clockTime">--:--</div>
+                <div class="clock-date" id="clockDate">----年--月--日 周-</div>
+            </div>
+        </div>
+
+        <!-- ===== 操作区 ===== -->
+        <div class="section">
+            <div class="section-title">操作</div>
+            <div class="button-group">
+                <button id="btnSelectImage" type="button">选择图片</button>
+                <button id="btnRecognize" type="button">识别当前图片</button>
+                <button id="btnOpenCustomSelect" type="button">自选食物</button>
+                <button id="btnClearLog" type="button">清空日志</button>
+            </div>
+            <div class="status-bar" id="statusBar">等待操作...</div>
+        </div>
+
+        <!-- ===== 图片预览区 ===== -->
+        <div class="section">
+            <div class="section-title">图片预览</div>
+            <div class="preview-container" id="previewContainer">
+                <img id="previewImage" alt="图片预览" style="display:none;">
+                <span class="preview-placeholder" id="previewPlaceholder">暂无图片</span>
+            </div>
+            <div style="font-size:14px; color:var(--text-tertiary);" id="imageInfo">未选择图片</div>
+        </div>
+
+        <!-- ===== 结果展示区 ===== -->
+        <div class="section">
+            <div class="section-title">识别结果</div>
+            <div class="result-area" id="resultArea">
+                <span style="color:var(--text-tertiary);">等待识别...</span>
+            </div>
+        </div>
+
+        <!-- ===== 识别历史记录区 ===== -->
+        <div class="section">
+            <div class="section-title" style="display:flex; align-items:center;">
+                识别历史记录
+                <button id="btnClearAllHistory" class="clear-all-btn" style="margin-left:auto;">一键清空</button>
+                <button id="btnRefreshHistory" class="refresh-btn" style="margin-left:8px;">刷新</button>
+            </div>
+            <div id="historyContainer">
+                <div style="color:var(--text-tertiary); padding:16px;">加载中...</div>
+            </div>
+            <div class="total-calories-display" id="totalCaloriesDisplay">总热量：0 大卡</div>
+        </div>
+
+        <!-- ===== 每日热量记录区 ===== -->
+        <div class="section">
+            <div class="section-title" style="display:flex; align-items:center;">
+                每日热量记录
+                <button id="btnRefreshDailyCalories" class="refresh-btn" style="margin-left:auto;">刷新</button>
+            </div>
+            <div id="dailyCaloriesContainer">
+                <div style="color:var(--text-tertiary); padding:16px;">加载中...</div>
+            </div>
+        </div>
+
+        <!-- ===== 操作日志区 ===== -->
+        <div class="section">
+            <div class="section-title">操作日志</div>
+            <div class="log-area" id="logArea">等待操作...</div>
+        </div>
+
+    </main>
+
+    <!-- 隐藏的文件输入 -->
+    <input type="file" id="fileInputAlbum" class="hidden-file-input" accept="image/*">
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ========== Supabase 配置 ==========
+            const SUPABASE_URL = 'https://gdfpwxtqfqhlvjmacxdu.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkZnB3eHRxZnFobHZqbWFjeGR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyODM5ODIsImV4cCI6MjEwMjg1OTk4Mn0.R0mA4f_HkTOweWcpVIJrU4itJy63COVztDPiUqpdGbg';
+            const HISTORY_TABLE = 'dish_history';
+            const CUSTOM_DISH_TABLE = 'custom_dishes';
+            const DAILY_CALORIES_TABLE = 'daily_calories';
+
+            // ========== 全局设置变量 ==========
+            let accessToken = '24.a993c78b60d18ed1c86803dc63f20dd0.2592000.1789874918.282335-124174945';
+            let defaultWeight = 200;
+            let compressMaxDim = 1280;
+            let compressQuality = 0.7;
+
+            let imageBase64 = null;
+            let imageDataUrl = null;
+            let imageFileName = null;
+            let currentDishName = '';
+            let currentCaloriePer100g = null;
+            let currentHasCalorie = false;
+
+            const BAIDU_DISH_URL = 'https://aip.baidubce.com/rest/2.0/image-classify/v2/dish';
+            const MAX_BASE64_SIZE = 4 * 1024 * 1024;
+
+            let pendingCallback = null;
+            let lastArchivedDate = null;
+
+            // ========== DOM 元素 ==========
+            const btnSelectImage = document.getElementById('btnSelectImage');
+            const btnRecognize = document.getElementById('btnRecognize');
+            const btnClearLog = document.getElementById('btnClearLog');
+            const btnRefreshHistory = document.getElementById('btnRefreshHistory');
+            const btnClearAllHistory = document.getElementById('btnClearAllHistory');
+            const btnRefreshDailyCalories = document.getElementById('btnRefreshDailyCalories');
+            const btnOpenCustomSelect = document.getElementById('btnOpenCustomSelect');
+            const statusBar = document.getElementById('statusBar');
+            const previewImage = document.getElementById('previewImage');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            const imageInfo = document.getElementById('imageInfo');
+            const resultArea = document.getElementById('resultArea');
+            const historyContainer = document.getElementById('historyContainer');
+            const totalCaloriesDisplay = document.getElementById('totalCaloriesDisplay');
+            const dailyCaloriesContainer = document.getElementById('dailyCaloriesContainer');
+            const logArea = document.getElementById('logArea');
+            const fileInputAlbum = document.getElementById('fileInputAlbum');
+            const clockTime = document.getElementById('clockTime');
+            const clockDate = document.getElementById('clockDate');
+            const pageTitle = document.getElementById('pageTitle');
+
+            const mobileHeader = document.getElementById('mobileHeader');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const overlay = document.getElementById('overlay');
+            const mobileDrawer = document.getElementById('mobileDrawer');
+            const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+            const settingsDrawer = document.getElementById('settingsDrawer');
+            const btnOpenSettingsDesktop = document.getElementById('btnOpenSettingsDesktop');
+            const btnOpenSettingsMobile = document.getElementById('btnOpenSettingsMobile');
+            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+            const settingsAccessTokenInput = document.getElementById('settingsAccessToken');
+            const settingsDefaultWeightInput = document.getElementById('settingsDefaultWeight');
+            const settingsMaxDimInput = document.getElementById('settingsMaxDim');
+            const settingsQualityInput = document.getElementById('settingsQuality');
+            const btnSaveSettings = document.getElementById('btnSaveSettings');
+
+            const flowModal = document.getElementById('flowModal');
+            const flowModalMessage = document.getElementById('flowModalMessage');
+            const flowCancelBtn = document.getElementById('flowCancelBtn');
+            const flowConfirmBtn = document.getElementById('flowConfirmBtn');
+
+            const customDishModal = document.getElementById('customDishModal');
+            const customDishSelect = document.getElementById('customDishSelect');
+            const newDishNameInput = document.getElementById('newDishName');
+            const newDishCalorieInput = document.getElementById('newDishCalorie');
+            const customDishCancelBtn = document.getElementById('customDishCancelBtn');
+            const customDishConfirmBtn = document.getElementById('customDishConfirmBtn');
+
+            // 自选食物抽屉
+            const customSelectDrawer = document.getElementById('customSelectDrawer');
+            const customSelectList = document.getElementById('customSelectList');
+            const customSelectWeight = document.getElementById('customSelectWeight');
+            const customSelectTotal = document.getElementById('customSelectTotal');
+            const btnSaveCustomSelect = document.getElementById('btnSaveCustomSelect');
+            const closeCustomSelectBtn = document.getElementById('closeCustomSelectBtn');
+
+            // 手动输入区域
+            const manualNameInput = document.getElementById('manualName');
+            const manualWeightInput = document.getElementById('manualWeight');
+            const manualEnergyInput = document.getElementById('manualEnergy');
+            const manualTotalDiv = document.getElementById('manualTotal');
+            const btnSaveManualDish = document.getElementById('btnSaveManualDish');
+
+            let selectedCustomDish = null;
+
+            // ========== 日志系统 ==========
+            function addLog(message, type) {
+                type = type || 'info';
+                const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+                if (logArea.textContent.trim() === '等待操作...') logArea.textContent = '';
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `<span class="log-time">[${timestamp}]</span><span class="log-message ${type}">${message}</span>`;
+                logArea.appendChild(entry);
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+
+            function clearLog() {
+                logArea.textContent = '等待操作...';
+                logArea.scrollTop = 0;
+            }
+
+            function setStatus(message, type) {
+                statusBar.textContent = message;
+                statusBar.classList.remove('success', 'error', 'loading');
+                if (type) statusBar.classList.add(type);
+            }
+
+            // ========== 抽屉控制 ==========
+            function openMobileDrawer() {
+                mobileDrawer.classList.add('open');
+                overlay.classList.add('show');
+                settingsDrawer.classList.remove('open');
+                customDishModal.classList.remove('show');
+                customSelectDrawer.classList.remove('open');
+            }
+
+            function closeMobileDrawer() {
+                mobileDrawer.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+
+            function openSettingsDrawer() {
+                settingsDrawer.classList.add('open');
+                overlay.classList.add('show');
+                mobileDrawer.classList.remove('open');
+                customDishModal.classList.remove('show');
+                customSelectDrawer.classList.remove('open');
+            }
+
+            function closeSettingsDrawer() {
+                settingsDrawer.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+
+            function openCustomSelectDrawer() {
+                customSelectDrawer.classList.add('open');
+                overlay.classList.add('show');
+                mobileDrawer.classList.remove('open');
+                settingsDrawer.classList.remove('open');
+                customDishModal.classList.remove('show');
+                loadCustomSelectList();
+                selectedCustomDish = null;
+                customSelectList.querySelectorAll('li').forEach(el => el.classList.remove('selected'));
+                customSelectWeight.value = defaultWeight;
+                updateCustomSelectTotal();
+                manualNameInput.value = '';
+                manualWeightInput.value = defaultWeight;
+                manualEnergyInput.value = '';
+                updateManualTotal();
+            }
+
+            function closeCustomSelectDrawer() {
+                customSelectDrawer.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+
+            hamburgerBtn.addEventListener('click', function() {
+                if (mobileDrawer.classList.contains('open')) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+            });
+
+            closeDrawerBtn.addEventListener('click', closeMobileDrawer);
+
+            overlay.addEventListener('click', function() {
+                closeMobileDrawer();
+                closeSettingsDrawer();
+                customDishModal.classList.remove('show');
+                closeCustomSelectDrawer();
+                overlay.classList.remove('show');
+            });
+
+            btnOpenSettingsDesktop.addEventListener('click', openSettingsDrawer);
+            btnOpenSettingsMobile.addEventListener('click', openSettingsDrawer);
+            closeSettingsBtn.addEventListener('click', closeSettingsDrawer);
+
+            btnOpenCustomSelect.addEventListener('click', openCustomSelectDrawer);
+            closeCustomSelectBtn.addEventListener('click', closeCustomSelectDrawer);
+
+            // ========== 设置面板逻辑 ==========
+            settingsAccessTokenInput.value = accessToken;
+            settingsDefaultWeightInput.value = defaultWeight;
+            settingsMaxDimInput.value = compressMaxDim;
+            settingsQualityInput.value = compressQuality;
+
+            btnSaveSettings.addEventListener('click', function() {
+                const newToken = settingsAccessTokenInput.value.trim();
+                if (newToken) {
+                    accessToken = newToken;
+                }
+                const newWeight = parseFloat(settingsDefaultWeightInput.value);
+                if (!isNaN(newWeight) && newWeight > 0) {
+                    defaultWeight = newWeight;
+                }
+                const newMaxDim = parseInt(settingsMaxDimInput.value, 10);
+                if (!isNaN(newMaxDim) && newMaxDim >= 400) {
+                    compressMaxDim = newMaxDim;
+                }
+                const newQuality = parseFloat(settingsQualityInput.value);
+                if (!isNaN(newQuality) && newQuality >= 0.1 && newQuality <= 1.0) {
+                    compressQuality = newQuality;
+                }
+                setStatus('设置已保存', 'success');
+                addLog('✅ 设置已更新', 'success');
+                closeSettingsDrawer();
+            });
+
+            // ========== 自定义菜品 API ==========
+            async function fetchCustomDishes() {
+                try {
+                    const url = `${SUPABASE_URL}/rest/v1/${CUSTOM_DISH_TABLE}?select=*&order=name.asc`;
+                    const res = await fetch(url, {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const data = await res.json();
+                    return data;
+                } catch (err) {
+                    console.error(err);
+                    addLog('❌ 加载自定义菜品失败：' + err.message, 'error');
+                    return [];
+                }
+            }
+
+            async function saveCustomDish(name, caloriePer100g, defaultWeightValue) {
+                try {
+                    const existing = await fetchCustomDishes();
+                    const existingDish = existing.find(d => d.name === name);
+                    if (existingDish) {
+                        const url = `${SUPABASE_URL}/rest/v1/${CUSTOM_DISH_TABLE}?id=eq.${existingDish.id}`;
+                        const res = await fetch(url, {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                calorie_per_100g: caloriePer100g,
+                                default_weight: defaultWeightValue
+                            })
+                        });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                    } else {
+                        const url = `${SUPABASE_URL}/rest/v1/${CUSTOM_DISH_TABLE}`;
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                calorie_per_100g: caloriePer100g,
+                                default_weight: defaultWeightValue
+                            })
+                        });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                    }
+                    addLog('✅ 自定义菜品已保存/更新', 'success');
+                    return true;
+                } catch (err) {
+                    console.error(err);
+                    addLog('❌ 保存自定义菜品失败：' + err.message, 'error');
+                    return false;
+                }
+            }
+
+            function showCustomDishModal() {
+                fetchCustomDishes().then(customDishes => {
+                    customDishSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+                    customDishes.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { sensitivity: 'accent' }));
+                    customDishes.forEach(dish => {
+                        const option = document.createElement('option');
+                        option.value = dish.id;
+                        option.textContent = `${dish.name} (${Math.round(dish.calorie_per_100g)} 大卡/100g)`;
+                        option.dataset.calorie = Math.round(dish.calorie_per_100g);
+                        customDishSelect.appendChild(option);
+                    });
+                    newDishNameInput.value = '';
+                    newDishCalorieInput.value = '';
+                    customDishModal.classList.add('show');
+                    overlay.classList.add('show');
+                });
+            }
+
+            async function confirmCustomDish() {
+                let selectedName = '';
+                let selectedCalorie = null;
+
+                const selectedOption = customDishSelect.options[customDishSelect.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    selectedName = selectedOption.textContent.split(' (')[0];
+                    selectedCalorie = Math.round(parseFloat(selectedOption.dataset.calorie));
+                }
+
+                const newName = newDishNameInput.value.trim();
+                const newCalorie = parseFloat(newDishCalorieInput.value);
+                if (newName && !isNaN(newCalorie) && newCalorie > 0) {
+                    const roundedCalorie = Math.round(newCalorie);
+                    const saved = await saveCustomDish(newName, roundedCalorie, defaultWeight);
+                    if (saved) {
+                        selectedName = newName;
+                        selectedCalorie = roundedCalorie;
+                    } else {
+                        setStatus('新建菜品保存失败', 'error');
+                        return;
+                    }
+                }
+
+                if (!selectedName || selectedCalorie === null) {
+                    setStatus('请选择或输入有效的菜品信息', 'error');
+                    return;
+                }
+
+                currentDishName = selectedName;
+                currentCaloriePer100g = selectedCalorie;
+                currentHasCalorie = true;
+
+                customDishModal.classList.remove('show');
+                overlay.classList.remove('show');
+
+                const confidence = '自定义菜品';
+                const caloriePer100g = selectedCalorie + ' 大卡';
+                setStatus('识别成功（自定义菜品）：' + selectedName, 'success');
+                addLog('✅ 自定义菜品：' + selectedName + ' | 每100g热量: ' + caloriePer100g, 'success');
+                displayTopDish(selectedName, confidence, caloriePer100g, true);
+            }
+
+            customDishCancelBtn.addEventListener('click', function() {
+                customDishModal.classList.remove('show');
+                overlay.classList.remove('show');
+                setStatus('已取消识别未知菜品', 'warning');
+                resultArea.innerHTML = '<span style="color:var(--text-tertiary);">未识别到菜品，已取消</span>';
+            });
+
+            customDishConfirmBtn.addEventListener('click', confirmCustomDish);
+
+            // ========== 自选食物抽屉逻辑 ==========
+            async function loadCustomSelectList() {
+                customSelectList.innerHTML = '';
+                const dishes = await fetchCustomDishes();
+                dishes.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { sensitivity: 'accent' }));
+                if (dishes.length === 0) {
+                    customSelectList.innerHTML = '<li style="justify-content:center; color:var(--text-tertiary);">暂无自定义菜品</li>';
+                    return;
+                }
+                dishes.forEach(dish => {
+                    const li = document.createElement('li');
+                    li.dataset.id = dish.id;
+                    li.dataset.name = dish.name;
+                    li.dataset.calorie = Math.round(dish.calorie_per_100g);
+                    li.dataset.defaultWeight = dish.default_weight || defaultWeight;
+                    li.innerHTML = `<span class="custom-select-name">${escapeHtml(dish.name)}</span><span class="custom-select-calorie">${Math.round(dish.calorie_per_100g)} 大卡/100g</span>`;
+                    li.addEventListener('click', function() {
+                        customSelectList.querySelectorAll('li').forEach(el => el.classList.remove('selected'));
+                        li.classList.add('selected');
+                        selectedCustomDish = {
+                            name: dish.name,
+                            caloriePer100g: Math.round(dish.calorie_per_100g),
+                            defaultWeight: dish.default_weight || defaultWeight
+                        };
+                        customSelectWeight.value = selectedCustomDish.defaultWeight;
+                        updateCustomSelectTotal();
+                    });
+                    customSelectList.appendChild(li);
+                });
+            }
+
+            function updateCustomSelectTotal() {
+                const weight = parseFloat(customSelectWeight.value);
+                if (selectedCustomDish && !isNaN(weight) && weight > 0) {
+                    const total = Math.round((selectedCustomDish.caloriePer100g / 100) * weight);
+                    customSelectTotal.textContent = `总热量：约 ${total} 大卡（按 ${weight} 克计算）`;
+                } else {
+                    customSelectTotal.textContent = '总热量：-- 大卡';
+                }
+            }
+
+            customSelectWeight.addEventListener('input', updateCustomSelectTotal);
+
+            btnSaveCustomSelect.addEventListener('click', function() {
+                if (!selectedCustomDish) {
+                    setStatus('请先选择一个食物', 'error');
+                    return;
+                }
+                const weight = parseFloat(customSelectWeight.value);
+                if (isNaN(weight) || weight <= 0) {
+                    setStatus('请输入有效的重量', 'error');
+                    return;
+                }
+                const estimatedCalorie = Math.round((selectedCustomDish.caloriePer100g / 100) * weight);
+                saveHistoryRecord({
+                    name: selectedCustomDish.name,
+                    estimated_calorie: estimatedCalorie
+                }).then(() => {
+                    closeCustomSelectDrawer();
+                    fetchHistory(); // 显式刷新历史记录
+                    setStatus('已保存自选食物记录', 'success');
+                });
+            });
+
+            // ========== 手动输入区域逻辑 ==========
+            function updateManualTotal() {
+                const weight = parseFloat(manualWeightInput.value);
+                const energy = parseFloat(manualEnergyInput.value);
+                if (!isNaN(weight) && weight > 0 && !isNaN(energy) && energy > 0) {
+                    const caloriePer100g = energy / 4.2;
+                    const total = Math.round((caloriePer100g / 100) * weight);
+                    manualTotalDiv.textContent = `总热量：约 ${total} 大卡（每100g ${caloriePer100g.toFixed(0)} 大卡）`;
+                } else {
+                    manualTotalDiv.textContent = '总热量：-- 大卡';
+                }
+            }
+
+            manualWeightInput.addEventListener('input', updateManualTotal);
+            manualEnergyInput.addEventListener('input', updateManualTotal);
+
+            btnSaveManualDish.addEventListener('click', async function() {
+                const name = manualNameInput.value.trim();
+                const weight = parseFloat(manualWeightInput.value);
+                const energy = parseFloat(manualEnergyInput.value);
+
+                if (!name) {
+                    setStatus('请输入食物名称', 'error');
+                    return;
+                }
+                if (isNaN(weight) || weight <= 0) {
+                    setStatus('请输入有效的重量', 'error');
+                    return;
+                }
+                if (isNaN(energy) || energy <= 0) {
+                    setStatus('请输入有效的能量', 'error');
+                    return;
+                }
+
+                const caloriePer100g = Math.round(energy / 4.2);
+                const totalCalorie = Math.round((caloriePer100g / 100) * weight);
+
+                const savedCustom = await saveCustomDish(name, caloriePer100g, weight);
+                if (!savedCustom) {
+                    setStatus('保存自定义菜品失败', 'error');
+                    return;
+                }
+
+                await saveHistoryRecord({
+                    name: name,
+                    estimated_calorie: totalCalorie
+                });
+
+                await loadCustomSelectList();
+                manualNameInput.value = '';
+                manualWeightInput.value = defaultWeight;
+                manualEnergyInput.value = '';
+                updateManualTotal();
+                setStatus('手动食物已保存', 'success');
+            });
+
+            // ========== 流量检测与提示 ==========
+            function isMobileDevice() {
+                return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+            }
+
+            function checkNetworkAndConfirm(imageSizeBytes, callback) {
+                const sizeMB = imageSizeBytes / (1024 * 1024);
+                if (sizeMB < 0.5) {
+                    addLog('图片小于0.5MB，跳过流量提示', 'info');
+                    callback();
+                    return;
+                }
+                if (!isMobileDevice()) {
+                    addLog('非移动设备，默认Wi-Fi，跳过流量提示', 'info');
+                    callback();
+                    return;
+                }
+                let isCellular = false;
+                try {
+                    if (navigator.connection) {
+                        const conn = navigator.connection;
+                        const effType = conn.effectiveType || '';
+                        const connType = conn.type || '';
+                        if (connType === 'cellular' || effType === 'cellular' || effType === '4g' || effType === '3g' || effType === '2g') {
+                            isCellular = true;
+                        }
+                    }
+                } catch (e) {}
+                if (!isCellular) {
+                    if (!navigator.connection) {
+                        addLog('无法检测网络类型，跳过流量提示', 'info');
+                    } else {
+                        addLog('当前网络为 Wi-Fi 或未知类型，自动继续', 'info');
+                    }
+                    callback();
+                } else {
+                    const sizeDisplay = sizeMB.toFixed(2);
+                    flowModalMessage.textContent = `当前正在使用移动数据，上传图片预计消耗约 ${sizeDisplay} MB 流量。是否继续？`;
+                    flowModal.classList.add('show');
+                    pendingCallback = callback;
+                }
+            }
+
+            flowConfirmBtn.addEventListener('click', function() {
+                flowModal.classList.remove('show');
+                if (pendingCallback) {
+                    pendingCallback();
+                    pendingCallback = null;
+                }
+            });
+
+            flowCancelBtn.addEventListener('click', function() {
+                flowModal.classList.remove('show');
+                pendingCallback = null;
+                addLog('用户取消了识别（流量提示）', 'warning');
+                setStatus('已取消上传识别', 'warning');
+            });
+
+            // ========== 刷新按钮状态 ==========
+            function setRefreshButtonLoading(button, loading) {
+                if (!button) return;
+                if (loading) {
+                    button.textContent = '刷新中…';
+                    button.disabled = true;
+                } else {
+                    button.textContent = '刷新';
+                    button.disabled = false;
+                }
+            }
+
+            // ========== Supabase 通用请求 ==========
+            async function apiRequest(method, path, body = null) {
+                try {
+                    const url = `${SUPABASE_URL}${path}`;
+                    const headers = {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    };
+                    if (body) headers['Content-Type'] = 'application/json';
+                    const res = await fetch(url, {
+                        method,
+                        headers,
+                        body: body ? JSON.stringify(body) : null
+                    });
+                    if (!res.ok) {
+                        // 尝试获取错误信息
+                        let errorMsg = 'HTTP ' + res.status;
+                        try {
+                            const errorData = await res.json();
+                            if (errorData && errorData.message) errorMsg += ': ' + errorData.message;
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    // 检查响应是否有内容
+                    const text = await res.text();
+                    if (text) {
+                        return JSON.parse(text);
+                    } else {
+                        return null;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    throw err;
+                }
+            }
+
+            // ========== 识别历史记录 API ==========
+            async function fetchHistory() {
+                setRefreshButtonLoading(btnRefreshHistory, true);
+                try {
+                    const data = await apiRequest('GET', `/rest/v1/${HISTORY_TABLE}?select=*&order=created_at.desc`);
+                    renderHistory(data);
+                } catch (err) {
+                    historyContainer.innerHTML = '<div style="color:var(--text-tertiary);">历史记录加载失败</div>';
+                    addLog('❌ 加载历史记录失败：' + err.message, 'error');
+                } finally {
+                    setRefreshButtonLoading(btnRefreshHistory, false);
+                }
+            }
+
+            async function saveHistoryRecord(record) {
+                try {
+                    await apiRequest('POST', `/rest/v1/${HISTORY_TABLE}`, record);
+                    addLog('✅ 历史记录已保存', 'success');
+                    fetchHistory();
+                } catch (err) {
+                    addLog('❌ 保存历史记录失败：' + err.message, 'error');
+                }
+            }
+
+            async function deleteHistoryRecord(id) {
+                try {
+                    await apiRequest('DELETE', `/rest/v1/${HISTORY_TABLE}?id=eq.${id}`);
+                    addLog('✅ 已删除记录 ' + id, 'success');
+                    return true;
+                } catch (err) {
+                    addLog('❌ 删除记录 ' + id + ' 失败：' + err.message, 'error');
+                    return false;
+                }
+            }
+
+            async function clearAllHistory() {
+                btnClearAllHistory.disabled = true;
+                addLog('正在清空历史记录...', 'info');
+                try {
+                    const records = await apiRequest('GET', `/rest/v1/${HISTORY_TABLE}?select=id`);
+                    if (records.length === 0) {
+                        addLog('历史记录已为空', 'info');
+                    } else {
+                        for (const record of records) {
+                            await deleteHistoryRecord(record.id);
+                        }
+                        addLog(`✅ 清空完成，成功删除 ${records.length} 条记录`, 'success');
+                    }
+                    fetchHistory();
+                } catch (err) {
+                    addLog('❌ 清空历史记录失败：' + err.message, 'error');
+                } finally {
+                    btnClearAllHistory.disabled = false;
+                }
+            }
+
+            function renderHistory(records) {
+                if (!records || records.length === 0) {
+                    historyContainer.innerHTML = '<div style="color:var(--text-tertiary); padding:16px;">暂无历史记录</div>';
+                    totalCaloriesDisplay.textContent = '总热量：0 大卡';
+                    return;
+                }
+                let html = '<ul class="history-list">';
+                let totalCalories = 0;
+                records.forEach(item => {
+                    const time = item.created_at ? new Date(item.created_at).toLocaleString('zh-CN') : '未知时间';
+                    const name = item.name || '未知菜品';
+                    const calorie = item.estimated_calorie != null ? item.estimated_calorie : null;
+                    if (typeof calorie === 'number' && !isNaN(calorie)) totalCalories += calorie;
+                    const calorieDisplay = calorie != null ? Math.round(calorie) + ' 大卡' : '暂无预估热量';
+                    html += `<li class="history-item">
+                        <div class="history-info">
+                            <span class="history-name">${escapeHtml(name)}</span>
+                            <span class="history-calorie">预估热量: ${escapeHtml(calorieDisplay)}</span>
+                            <span class="history-time">${escapeHtml(time)}</span>
+                        </div>
+                        <button class="history-delete" data-id="${escapeHtml(item.id)}">删除</button>
+                    </li>`;
+                });
+                html += '</ul>';
+                historyContainer.innerHTML = html;
+                totalCaloriesDisplay.textContent = '总热量：' + Math.round(totalCalories) + ' 大卡';
+            }
+
+            // ========== 每日热量记录 API ==========
+            async function fetchDailyCalories() {
+                setRefreshButtonLoading(btnRefreshDailyCalories, true);
+                try {
+                    const data = await apiRequest('GET', `/rest/v1/${DAILY_CALORIES_TABLE}?select=*&order=date.desc`);
+                    renderDailyCalories(data);
+                } catch (err) {
+                    dailyCaloriesContainer.innerHTML = '<div style="color:var(--text-tertiary);">每日热量记录加载失败</div>';
+                    addLog('❌ 加载每日热量记录失败：' + err.message, 'error');
+                } finally {
+                    setRefreshButtonLoading(btnRefreshDailyCalories, false);
+                }
+            }
+
+            function renderDailyCalories(records) {
+                if (!records || records.length === 0) {
+                    dailyCaloriesContainer.innerHTML = '<div style="color:var(--text-tertiary); padding:16px;">暂无每日热量记录</div>';
+                    return;
+                }
+                let html = '<ul class="daily-calories-list">';
+                records.forEach(item => {
+                    const date = item.date ? item.date : '未知日期';
+                    const total = item.total_calorie ? Math.round(item.total_calorie) : 0;
+                    html += `<li class="daily-item">
+                        <span class="daily-date">${escapeHtml(date)}</span>
+                        <span class="daily-total">${total} 大卡</span>
+                    </li>`;
+                });
+                html += '</ul>';
+                dailyCaloriesContainer.innerHTML = html;
+            }
+
+            // 每日零点归档函数
+            async function archiveDailyCaloriesIfNeeded() {
+                const now = new Date();
+                const todayStr = now.toISOString().slice(0, 10);
+                if (lastArchivedDate === todayStr) return;
+                const todayStart = new Date(now);
+                todayStart.setHours(0, 0, 0, 0);
+                if (now >= todayStart && now < new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)) {
+                    try {
+                        const startOfDayISO = new Date(todayStart.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+                        const endOfDayISO = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000 - now.getTimezoneOffset() * 60000).toISOString();
+                        const records = await apiRequest('GET', `/rest/v1/${HISTORY_TABLE}?select=*&created_at=gte.${startOfDayISO}&created_at=lt.${endOfDayISO}`);
+                        if (records.length > 0) {
+                            const totalCalorie = records.reduce((sum, rec) => sum + (parseFloat(rec.estimated_calorie) || 0), 0);
+                            const roundedTotal = Math.round(totalCalorie);
+                            const existing = await apiRequest('GET', `/rest/v1/${DAILY_CALORIES_TABLE}?date=eq.${todayStr}&select=id`);
+                            if (existing.length === 0) {
+                                await apiRequest('POST', `/rest/v1/${DAILY_CALORIES_TABLE}`, {
+                                    date: todayStr,
+                                    total_calorie: roundedTotal
+                                });
+                                addLog(`✅ 已归档 ${todayStr} 总热量：${roundedTotal} 大卡`, 'success');
+                            }
+                            for (const rec of records) {
+                                await deleteHistoryRecord(rec.id);
+                            }
+                            addLog(`🗑️ 已删除 ${records.length} 条当天识别历史记录`, 'info');
+                            fetchHistory();
+                        }
+                    } catch (err) {
+                        addLog('❌ 每日归档失败：' + err.message, 'error');
+                    }
+                    lastArchivedDate = todayStr;
+                }
+            }
+
+            setInterval(archiveDailyCaloriesIfNeeded, 60 * 1000);
+            setTimeout(archiveDailyCaloriesIfNeeded, 1000);
+
+            // ========== 图片压缩 ==========
+            function compressImage(dataUrl) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        const originalWidth = img.width;
+                        const originalHeight = img.height;
+                        let maxDim = compressMaxDim;
+                        let quality = compressQuality;
+                        const tryCompress = (width, height, q) => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const newDataUrl = canvas.toDataURL('image/jpeg', q);
+                            const base64Match = newDataUrl.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/);
+                            if (!base64Match) reject(new Error('压缩失败'));
+                            return { dataUrl: newDataUrl, base64: base64Match[1] };
+                        };
+                        const processCompress = () => {
+                            let ratio = Math.min(1, maxDim / Math.max(originalWidth, originalHeight));
+                            let targetWidth = Math.round(originalWidth * ratio);
+                            let targetHeight = Math.round(originalHeight * ratio);
+                            let result = tryCompress(targetWidth, targetHeight, quality);
+                            while (result.base64.length > MAX_BASE64_SIZE) {
+                                if (quality > 0.5) {
+                                    quality -= 0.1;
+                                } else {
+                                    maxDim = Math.round(maxDim * 0.8);
+                                    if (maxDim < 400) { reject(new Error('压缩后仍超过 4MB')); return; }
+                                    ratio = Math.min(1, maxDim / Math.max(originalWidth, originalHeight));
+                                    targetWidth = Math.round(originalWidth * ratio);
+                                    targetHeight = Math.round(originalHeight * ratio);
+                                }
+                                result = tryCompress(targetWidth, targetHeight, quality);
+                            }
+                            resolve(result);
+                        };
+                        processCompress();
+                    };
+                    img.onerror = () => reject(new Error('图片加载失败'));
+                    img.src = dataUrl;
+                });
+            }
+
+            // ========== 图片选择 ==========
+            async function handleFileSelect(file) {
+                if (!file) return;
+                if (!file.type.startsWith('image/')) { setStatus('请选择图片文件', 'error'); return; }
+                imageFileName = file.name;
+                addLog('已选择图片 (大小: ' + formatFileSize(file.size) + ')', 'info');
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    let dataUrl = e.target.result;
+                    let base64Match = dataUrl.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/);
+                    if (!base64Match) { setStatus('图片读取失败', 'error'); return; }
+                    let imgBase64 = base64Match[1];
+                    let imgDataUrl = dataUrl;
+                    const originalSizeMB = (imgBase64.length / (1024 * 1024)).toFixed(2);
+                    addLog('原始图片 base64 大小: ' + originalSizeMB + 'MB', 'info');
+                    if (imgBase64.length > MAX_BASE64_SIZE) {
+                        addLog('⚠️ 图片超过 4MB，自动压缩中...', 'warning');
+                        setStatus('图片过大，正在压缩...', 'loading');
+                        try {
+                            const compressed = await compressImage(imgDataUrl);
+                            imgBase64 = compressed.base64;
+                            imgDataUrl = compressed.dataUrl;
+                            const newSizeMB = (imgBase64.length / (1024 * 1024)).toFixed(2);
+                            addLog('✅ 压缩完成，新大小: ' + newSizeMB + 'MB', 'success');
+                            setStatus('图片已压缩', 'info');
+                        } catch (err) {
+                            setStatus('压缩失败', 'error');
+                            addLog('❌ 压缩失败：' + err.message, 'error');
+                            return;
+                        }
+                    } else {
+                        setStatus('图片已选择，可以开始识别', 'info');
+                    }
+                    window.imageBase64 = imgBase64;
+                    window.imageDataUrl = imgDataUrl;
+                    previewImage.src = imgDataUrl;
+                    previewImage.style.display = 'block';
+                    previewPlaceholder.style.display = 'none';
+                    imageInfo.textContent = file.name + '（base64: ' + (imgBase64.length / (1024 * 1024)).toFixed(2) + 'MB）';
+
+                    if (accessToken) {
+                        addLog('准备自动识别，检查网络流量...', 'info');
+                        checkNetworkAndConfirm(imgBase64.length, function() {
+                            addLog('流量检查通过，开始识别...', 'info');
+                            recognizeDish();
+                        });
+                    } else {
+                        setStatus('请先输入 Access Token', 'warning');
+                    }
+                };
+                reader.onerror = () => setStatus('图片读取失败', 'error');
+                reader.readAsDataURL(file);
+            }
+
+            function selectImage() { fileInputAlbum.click(); }
+            fileInputAlbum.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                handleFileSelect(file);
+                e.target.value = '';
+            });
+
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+                else return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            // ========== 识别 ==========
+            async function recognizeDish() {
+                const currentBase64 = window.imageBase64;
+                if (!accessToken) { setStatus('请先输入 Access Token', 'error'); return; }
+                if (!currentBase64) { setStatus('请先选择图片', 'error'); return; }
+                if (currentBase64.length > MAX_BASE64_SIZE) { setStatus('图片过大，无法识别', 'error'); return; }
+                setStatus('识别中...', 'loading');
+                addLog('开始调用菜品识别接口...', 'info');
+                try {
+                    const params = new URLSearchParams();
+                    params.append('image', currentBase64);
+                    params.append('top_num', '5');
+                    params.append('access_token', accessToken);
+                    const response = await fetch(BAIDU_DISH_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    });
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const data = await response.json();
+                    if (data.error_code) throw new Error('百度 API 错误：' + data.error_msg);
+                    if (!data.result || data.result.length === 0) {
+                        setStatus('未识别到菜品', 'warning');
+                        resultArea.innerHTML = '<span style="color:var(--text-tertiary);">未识别到任何菜品。</span>';
+                        return;
+                    }
+                    const topDish = data.result[0];
+                    const name = topDish.name || '未知菜品';
+                    const confidence = topDish.probability ? (parseFloat(topDish.probability) * 100).toFixed(2) + '%' : 'N/A';
+                    const caloriePer100g = topDish.calorie ? Math.round(parseFloat(topDish.calorie)) : null;
+                    const hasCalorie = topDish.has_calorie === true;
+
+                    if (name === '非菜') {
+                        addLog('识别结果为“非菜”，需要手动选择或新建菜品', 'warning');
+                        showCustomDishModal();
+                        return;
+                    }
+
+                    currentDishName = name;
+                    currentCaloriePer100g = caloriePer100g;
+                    currentHasCalorie = hasCalorie;
+                    setStatus('识别成功：' + name + '（' + confidence + '）', 'success');
+                    addLog('✅ 识别成功！' + name + ' | 置信度: ' + confidence + ' | 每100g热量: ' + caloriePer100g + ' kcal', 'success');
+                    displayTopDish(name, confidence, caloriePer100g, hasCalorie);
+                } catch (error) {
+                    setStatus('识别失败，请查看日志', 'error');
+                    addLog('❌ 识别失败：' + error.message, 'error');
+                    resultArea.innerHTML = `<span style="color:#c62828;font-weight:600;">❌ ${escapeHtml(error.message)}</span>`;
+                }
+            }
+
+            function displayTopDish(name, confidence, caloriePer100g, hasCalorie) {
+                const calorieNum = caloriePer100g != null ? Math.round(parseFloat(caloriePer100g)) : null;
+                let html = `<ul class="result-list"><li>
+                    <span class="result-name">${escapeHtml(name)}</span>
+                    <span class="result-confidence">置信度: ${escapeHtml(confidence)}</span>
+                    <span class="result-calorie">每100g热量: ${calorieNum != null ? calorieNum + ' kcal' : '暂无数据'}</span>
+                    ${hasCalorie ? '<span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;font-size:12px;">含卡路里数据</span>' : '<span style="background:#f5f5f5;color:#999;padding:2px 8px;border-radius:10px;font-size:12px;">无卡路里数据</span>'}
+                </li></ul>`;
+                html += `<div class="weight-input-group">
+                    <label for="weightInput">估计重量：</label>
+                    <input type="number" id="weightInput" min="1" step="25" value="${defaultWeight}">
+                    <span>克</span>
+                </div>
+                <div class="total-calorie" id="totalCalorieDisplay">总热量：-- 大卡</div>
+                <button class="save-btn" id="btnSaveHistory">保存到历史记录</button>`;
+                resultArea.innerHTML = html;
+                const weightInput = document.getElementById('weightInput');
+                const totalDisplay = document.getElementById('totalCalorieDisplay');
+                const saveBtn = document.getElementById('btnSaveHistory');
+                function updateTotal() {
+                    const weight = parseFloat(weightInput.value);
+                    if (!isNaN(weight) && weight > 0 && calorieNum != null) {
+                        const total = Math.round((calorieNum / 100) * weight);
+                        totalDisplay.textContent = '总热量：约 ' + total + ' 大卡（按 ' + weight + ' 克计算）';
+                    } else {
+                        totalDisplay.textContent = '总热量：-- 大卡';
+                    }
+                }
+                weightInput.addEventListener('input', updateTotal);
+                updateTotal();
+                saveBtn.addEventListener('click', function() {
+                    const weight = parseFloat(weightInput.value);
+                    if (isNaN(weight) || weight <= 0) { setStatus('请输入有效的重量', 'error'); return; }
+                    if (calorieNum == null) { setStatus('该菜品无卡路里数据，无法计算', 'error'); return; }
+                    const estimatedCalorie = Math.round((calorieNum / 100) * weight);
+                    saveHistoryRecord({ name: currentDishName, estimated_calorie: estimatedCalorie });
+                    saveBtn.disabled = true; saveBtn.textContent = '已保存';
+                    setTimeout(() => { saveBtn.disabled = false; saveBtn.textContent = '保存到历史记录'; }, 2000);
+                });
+            }
+
+            function escapeHtml(str) {
+                if (typeof str !== 'string') return String(str);
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            }
+
+            // ========== 时钟与问候语 ==========
+            function updateGreetingAndClock() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                clockTime.textContent = `${String(hours).padStart(2, '0')}:${minutes}`;
+                const days = ['日', '一', '二', '三', '四', '五', '六'];
+                const month = now.getMonth() + 1;
+                const day = now.getDate();
+                const week = days[now.getDay()];
+                clockDate.textContent = `${month}月${day}日 周${week}`;
+
+                let greeting;
+                if (hours >= 5 && hours < 12) {
+                    greeting = 'Good morning';
+                } else if (hours >= 12 && hours < 18) {
+                    greeting = 'Good afternoon';
+                } else {
+                    greeting = 'Good evening';
+                }
+                pageTitle.textContent = `${greeting}, wargance`;
+            }
+
+            updateGreetingAndClock();
+            setInterval(updateGreetingAndClock, 1000);
+
+            // ========== 手动识别按钮 ==========
+            btnRecognize.addEventListener('click', function() {
+                const currentBase64 = window.imageBase64;
+                if (!accessToken) { setStatus('请先输入 Access Token', 'error'); return; }
+                if (!currentBase64) { setStatus('请先选择图片', 'error'); return; }
+                addLog('手动触发识别，检查网络流量...', 'info');
+                checkNetworkAndConfirm(currentBase64.length, function() {
+                    addLog('流量检查通过，开始识别...', 'info');
+                    recognizeDish();
+                });
+            });
+
+            // ========== 其他事件绑定 ==========
+            btnSelectImage.addEventListener('click', selectImage);
+            btnClearLog.addEventListener('click', function() { clearLog(); setStatus('日志已清空', 'info'); });
+            btnRefreshHistory.addEventListener('click', fetchHistory);
+            btnClearAllHistory.addEventListener('click', clearAllHistory);
+            btnRefreshDailyCalories.addEventListener('click', fetchDailyCalories);
+            historyContainer.addEventListener('click', function(e) {
+                const deleteBtn = e.target.closest('.history-delete');
+                if (!deleteBtn) return;
+                const id = deleteBtn.getAttribute('data-id');
+                if (id) deleteHistoryRecord(id).then(() => fetchHistory());
+            });
+
+            // ========== 强制数字输入框上下箭头按 step 调整 ==========
+            document.addEventListener('keydown', function(e) {
+                const target = e.target;
+                if (target.tagName === 'INPUT' && target.type === 'number') {
+                    const step = parseFloat(target.step) || 1;
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const current = parseFloat(target.value);
+                        const min = parseFloat(target.min) || -Infinity;
+                        const max = parseFloat(target.max) || Infinity;
+                        if (isNaN(current)) {
+                            target.value = min;
+                        } else {
+                            let newVal = current + step;
+                            if (newVal > max) newVal = max;
+                            target.value = newVal;
+                        }
+                        target.dispatchEvent(new Event('input', { bubbles: true }));
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const current = parseFloat(target.value);
+                        const min = parseFloat(target.min) || -Infinity;
+                        if (isNaN(current)) {
+                            target.value = min;
+                        } else {
+                            let newVal = current - step;
+                            if (newVal < min) newVal = min;
+                            target.value = newVal;
+                        }
+                        target.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            });
+
+            // 初始化
+            addLog('页面加载完成，已加载默认 Access Token', 'info');
+            fetchHistory();
+            fetchDailyCalories();
+        })();
+    </script>
+</body>
+</html>
