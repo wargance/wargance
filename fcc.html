@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>菜品识别工具</title>
+    <script>
+        // 检查登录状态，未登录则跳转到登录页
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
     <style>
         /* ==================== 全局样式 ==================== */
         * {
