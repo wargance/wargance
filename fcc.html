@@ -2521,28 +2521,28 @@
                     const step = parseFloat(target.step) || 1;
                     if (e.key === 'ArrowUp') {
                         e.preventDefault();
-                        const current = parseFloat(target.value);
                         const min = parseFloat(target.min) || -Infinity;
                         const max = parseFloat(target.max) || Infinity;
-                        if (isNaN(current)) {
-                            target.value = min;
-                        } else {
-                            let newVal = current + step;
-                            if (newVal > max) newVal = max;
-                            target.value = newVal;
+                        let current = parseFloat(target.value);
+                        if (isNaN(current)) current = min;
+                        let newVal = current + step;
+                        if (Number.isInteger(step)) {
+                            newVal = Math.round(newVal);
                         }
+                        if (newVal > max) newVal = max;
+                        target.value = newVal;
                         target.dispatchEvent(new Event('input', { bubbles: true }));
                     } else if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        const current = parseFloat(target.value);
                         const min = parseFloat(target.min) || -Infinity;
-                        if (isNaN(current)) {
-                            target.value = min;
-                        } else {
-                            let newVal = current - step;
-                            if (newVal < min) newVal = min;
-                            target.value = newVal;
+                        let current = parseFloat(target.value);
+                        if (isNaN(current)) current = min;
+                        let newVal = current - step;
+                        if (Number.isInteger(step)) {
+                            newVal = Math.round(newVal);
                         }
+                        if (newVal < min) newVal = min;
+                        target.value = newVal;
                         target.dispatchEvent(new Event('input', { bubbles: true }));
                     }
                 }
