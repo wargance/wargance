@@ -210,11 +210,6 @@
             min-height: 20px;
         }
 
-        /* 密码输入框伪装为圆点（仅 WebKit 浏览器） */
-        .password-mask {
-            -webkit-text-security: disc;
-        }
-
         /* ==================== 移动端适配 ==================== */
         @media (max-width: 768px) {
             .sidebar {
@@ -263,8 +258,7 @@
                 </div>
                 <div>
                     <label for="password">密码</label>
-                    <!-- 使用 type="text" 避免 Dplooy 警告，配合 CSS 隐藏输入内容 -->
-                    <input type="text" id="password" name="password" autocomplete="current-password" class="password-mask" required>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
                 </div>
                 <button type="submit" class="login-btn">登录</button>
                 <div class="login-error" id="loginError"></div>
@@ -276,8 +270,6 @@
         (function() {
             const form = document.getElementById('loginForm');
             const errorDiv = document.getElementById('loginError');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
 
             // 预定义的 SHA-256 哈希值
             const USERNAME_HASH = 'd7150fa2cb4c509e32aed7dba2e96cf2d4277315d56eb42c4a173ab3e23a4384';
@@ -293,8 +285,8 @@
 
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value.trim();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
 
                 errorDiv.textContent = '';
 
@@ -303,8 +295,7 @@
                     const passwordHash = await sha256(password);
 
                     if (usernameHash === USERNAME_HASH && passwordHash === PASSWORD_HASH) {
-                        // 验证成功，跳转到指定地址
-                        window.location.href = 'https://wargance.dplooy.com';
+                        window.location.href = 'https://wargance.pages.dev/fcc';
                     } else {
                         errorDiv.textContent = '账号或密码错误，请重试。';
                     }
